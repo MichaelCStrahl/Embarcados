@@ -20,7 +20,7 @@ static int leQTD(u_int8_t i, uint8_t *num, char *buffer);
 static int leDADOS(u_int8_t *i, uint8_t num, char *buffer);
 static int checkSUM(u_int8_t i, char chk_rec);
 static int leETX(u_int8_t i);
-
+static void msg(u_int8_t n, char *buffer);
 
 int main(){
     enum States {CHECK_STX = 0, QTD_DADOS, LE_DADOS, CHECKSUM, CHECK_ETX,FIM_TRANSMISSAO};
@@ -68,9 +68,8 @@ int main(){
 
         case LE_DADOS:
             // Le os dados
-            chk_rec = leDADOS(&iterator, num, buffer);
+            chk_rec = leDADOS(&iterator, num, &buffer);
             cont_test++;
-            iterator++;
             if (chk_rec == NULL){
                 state = FIM_TRANSMISSAO;
                 err = 3;
@@ -80,6 +79,7 @@ int main(){
 
         case CHECKSUM:
             // Faz checksum
+            printf("interador: %d\n", iterator);
             chk_tran = checkSUM(iterator, chk_rec);
             cont_test++;
             iterator++;
@@ -106,8 +106,10 @@ int main(){
                 printf("Houve erro na função %d, %d testes foram feitos. Reiniciando recebimento de protocolo.\n", state,cont_test);
             }
             else {
-                printf("Transmissao completa. %d testes feitos. Aguardando nova transmissão.\n", cont_test);
-                printf("Mensagem: %s\n", buffer);
+                uint8_t n = sizeof(buffer) / sizeof(int*);
+                //printf("Transmissao completa. %d testes feitos. Aguardando nova transmissão.\n", cont_test);
+                msg(n, &buffer);
+                
                 state = CHECK_STX;
             }
             break;
@@ -133,8 +135,7 @@ static int leQTD(u_int8_t i, uint8_t *num, char *buffer){
     if (mensagem[i] > 0){
         buffer = (char*) malloc(mensagem[i] * sizeof(char));
         *num = mensagem[i];
-        printf("QTD: %d \n", mensagem[i]);        
-        printf("até´aqui");
+        printf("QTD: %d \n", mensagem[i]);
         return true;
     }
     else return false;
@@ -143,12 +144,15 @@ static int leQTD(u_int8_t i, uint8_t *num, char *buffer){
 static int leDADOS(u_int8_t *i, uint8_t num, char *buffer){
     uint8_t qtd_dados = num;
     uint8_t chk;
+    printf("i: %d \n", *i);
+    // printf("buffer: ");
     while(qtd_dados > 0){
         buffer[qtd_dados - num] = mensagem[*i];
         chk = buffer[qtd_dados - num] ^ chk;
-        *i++;
+        printf("buffer: %d, i: %d, qtd: %d, index: %d, num: %d \n", mensagem[*i], *i, qtd_dados, qtd_dados - num, num);
+        *i = *i + 1;
         qtd_dados--;
-    }    
+    }
     printf("CHK-DADOS: %d \n", chk);
     return chk;
 }
@@ -165,4 +169,17 @@ static int leETX(u_int8_t i){
         return true;
     }
     else return false;
+}
+
+static void msg(u_int8_t n, char *buffer) {
+    u_int8_t aux = 0;
+    printf("buffer: ");
+
+    while(aux <= n){
+        printf("%d, ", buffer[n - aux]);
+        aux++;
+    }
+    printf("teste: %d, %d, %d", buffer[-1], buffer[0], buffer[1]);
+
+    printf("\n");
 }
