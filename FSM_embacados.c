@@ -13,14 +13,14 @@ S4(le chk) -> S5(le ETX) -> S1(le novo prot) ;; S6(imprime parte que houve erro)
 #include <stdlib.h>
 #include <stdbool.h> 
 
-char mensagem[6] = {0x02, 0x02, 2, 4, 6, 0x03};
+char mensagem[9] = {0x02, 0x05, 2, 1, 1, 5, 4, 1024, 0x03};
 
-static int leSTX(u_int8_t i);
-static int leQTD(u_int8_t i, uint8_t *num, char *buffer);
-static int leDADOS(u_int8_t *i, uint8_t num, char *buffer);
-static int checkSUM(u_int8_t i, char chk_rec);
-static int leETX(u_int8_t i);
-static void msg(u_int8_t n, char *buffer);
+static int leSTX(uint8_t i);
+static int leQTD(uint8_t i, uint8_t *num, char *buffer);
+static int leDADOS(uint8_t *i, uint8_t num, char *buffer);
+static int checkSUM(uint8_t i, char chk_rec);
+static int leETX(uint8_t i);
+static void msg(uint8_t n, char *buffer);
 
 int main(){
     enum States {CHECK_STX = 0, QTD_DADOS, LE_DADOS, CHECKSUM, CHECK_ETX,FIM_TRANSMISSAO};
@@ -44,6 +44,7 @@ int main(){
         {
         case CHECK_STX:
             // Le inicio da transmissao
+
             stx = leSTX(iterator);
             cont_test++;
             iterator++;
@@ -103,7 +104,7 @@ int main(){
         case FIM_TRANSMISSAO:
             // Imprime erro na tela
             if (err != 0){
-                printf("Houve erro na função %d, %d testes foram feitos. Reiniciando recebimento de protocolo.\n", state,cont_test);
+                printf("Houve erro na função %d, %d testes foram feitos. Reiniciando recebimento de protocolo.\n", err,cont_test);
             }
             else {
                 uint8_t n = sizeof(buffer) / sizeof(int*);
@@ -123,7 +124,7 @@ int main(){
     return 0;
 }
 
-static int leSTX(u_int8_t i){
+static int leSTX(uint8_t i){
     if (mensagem[i] == 0x02){
         printf("STX: %d \n", mensagem[i]);
         return true;
@@ -131,7 +132,7 @@ static int leSTX(u_int8_t i){
     else return false;
 }
 
-static int leQTD(u_int8_t i, uint8_t *num, char *buffer){
+static int leQTD(uint8_t i, uint8_t *num, char *buffer){
     if (mensagem[i] > 0){
         buffer = (char*) malloc(mensagem[i] * sizeof(char));
         *num = mensagem[i];
@@ -141,7 +142,7 @@ static int leQTD(u_int8_t i, uint8_t *num, char *buffer){
     else return false;
 }
 
-static int leDADOS(u_int8_t *i, uint8_t num, char *buffer){
+static int leDADOS(uint8_t *i, uint8_t num, char *buffer){
     uint8_t qtd_dados = num;
     uint8_t chk;
     printf("i: %d \n", *i);
@@ -157,22 +158,22 @@ static int leDADOS(u_int8_t *i, uint8_t num, char *buffer){
     return chk;
 }
 
-static int checkSUM(u_int8_t i, char chk_rec){
+static int checkSUM(uint8_t i, char chk_rec){
     if (chk_rec == mensagem[i]){
         return true;
     }
     else return false;
 }
 
-static int leETX(u_int8_t i){
+static int leETX(uint8_t i){
     if (mensagem[i] == 0x03){
         return true;
     }
     else return false;
 }
 
-static void msg(u_int8_t n, char *buffer) {
-    u_int8_t aux = 0;
+static void msg(uint8_t n, char *buffer) {
+    uint8_t aux = 0;
     printf("buffer: ");
 
     while(aux <= n){
