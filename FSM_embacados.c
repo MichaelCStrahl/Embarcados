@@ -13,7 +13,7 @@ S4(le chk) -> S5(le ETX) -> S1(le novo prot) ;; S6(imprime parte que houve erro)
 #include <stdlib.h>
 #include <stdbool.h> 
 
-char mensagem[9] = {0x02, 0x05, 2, 1, 1, 5, 4, 1024, 0x03};
+char mensagem[9] = {0x02, 0x03, 2, 1, 1, 2, 0x03};
 
 static int leSTX(uint8_t i);
 static int leQTD(uint8_t i, uint8_t *num, char *buffer);
@@ -105,14 +105,15 @@ int main(){
             // Imprime erro na tela
             if (err != 0){
                 printf("Houve erro na função %d, %d testes foram feitos. Reiniciando recebimento de protocolo.\n", err,cont_test);
+
             }
             else {
                 uint8_t n = sizeof(buffer) / sizeof(int*);
-                //printf("Transmissao completa. %d testes feitos. Aguardando nova transmissão.\n", cont_test);
+                printf("Transmissao completa. %d testes feitos. Aguardando nova transmissão.\n", cont_test);
                 msg(n, &buffer);
                 
-                state = CHECK_STX;
             }
+            state = CHECK_STX;
             break;
 
         default:
@@ -180,7 +181,6 @@ static void msg(uint8_t n, char *buffer) {
         printf("%d, ", buffer[n - aux]);
         aux++;
     }
-    printf("teste: %d, %d, %d", buffer[-1], buffer[0], buffer[1]);
 
     printf("\n");
 }
