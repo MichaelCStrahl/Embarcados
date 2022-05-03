@@ -13,7 +13,7 @@ S4(le chk) -> S5(le ETX) -> S1(le novo prot) ;; S6(imprime parte que houve erro)
 #include <stdlib.h>
 #include <stdbool.h> 
 
-char mensagem[9] = {0x02, 0x03, 2, 1, 1, 2, 0x03};
+char mensagem[9] = {0x02, 0x03, 2, 1, 1, 2, 0x03}; // Mensagem enviada
 
 static int leSTX(uint8_t i);
 static int leQTD(uint8_t i, uint8_t *num, char *buffer);
@@ -38,7 +38,7 @@ int main(){
     bool chk;
     bool etx;
 
-    for (int i = 0; i <= 100; i++)
+    for ( ; ; )
     {
         switch (state)
         {
@@ -104,15 +104,17 @@ int main(){
         case FIM_TRANSMISSAO:
             // Imprime erro na tela
             if (err != 0){
-                printf("Houve erro na função %d, %d testes foram feitos. Reiniciando recebimento de protocolo.\n", err,cont_test);
+                printf("Houve erro na função %d, %d testes foram feitos. Reiniciando recebimento de protocolo.\n", err, cont_test);
 
             }
             else {
-                uint8_t n = sizeof(buffer) / sizeof(int*);
                 printf("Transmissao completa. %d testes feitos. Aguardando nova transmissão.\n", cont_test);
-                msg(n, &buffer);
-                
+                msg(num, &buffer);
             }
+            err = 0;
+            num = 0;
+            cont_test = 0;
+            iterator = 0;
             state = CHECK_STX;
             break;
 
@@ -145,13 +147,13 @@ static int leQTD(uint8_t i, uint8_t *num, char *buffer){
 
 static int leDADOS(uint8_t *i, uint8_t num, char *buffer){
     uint8_t qtd_dados = num;
-    uint8_t chk;
+    uint8_t chk = 0;
     printf("i: %d \n", *i);
     // printf("buffer: ");
     while(qtd_dados > 0){
-        buffer[qtd_dados - num] = mensagem[*i];
-        chk = buffer[qtd_dados - num] ^ chk;
-        printf("buffer: %d, i: %d, qtd: %d, index: %d, num: %d \n", mensagem[*i], *i, qtd_dados, qtd_dados - num, num);
+        buffer[num - qtd_dados] = mensagem[*i];
+        chk = buffer[num - qtd_dados] ^ chk;
+        printf("buffer: %d, i: %d, qtd: %d, index: %d, num: %d \n", mensagem[*i], *i, qtd_dados, num - qtd_dados, num);
         *i = *i + 1;
         qtd_dados--;
     }
@@ -177,10 +179,10 @@ static void msg(uint8_t n, char *buffer) {
     uint8_t aux = 0;
     printf("buffer: ");
 
-    while(aux <= n){
-        printf("%d, ", buffer[n - aux]);
+    while(aux < n){
+        printf("%d, ", buffer[aux]);
         aux++;
     }
 
-    printf("\n");
+    printf("\n\n\n");
 }

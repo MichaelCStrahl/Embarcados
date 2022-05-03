@@ -1,5 +1,6 @@
 *
 *.exe
-.vscode
+/.vscode
 !FSM_embacados.c
 !.gitignore
+!checksum.c
