@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h> 
 
 /*
 Tabela estados/eventos, func/prox = funcao (pode ser NULL) 
