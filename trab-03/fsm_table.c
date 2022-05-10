@@ -25,7 +25,6 @@ S4(le chk) -> S5(le ETX) -> S1(le novo prot) ;; S6(imprime parte que houve erro)
 #define ESTADOS 5
 #define EVENTOS 2
 
-
 typedef struct
 {
   void (*ptrFunc) (void);
@@ -64,6 +63,27 @@ void __init__(void){
 
 
 /* ---------------------------------------------------------------------------- */
+void printError(uint8_t err) {
+    switch (err)
+    {
+    case STX:        
+        printf("Erro no STX \n");
+        break;
+
+    case QTD:        
+        printf("Erro na leitura da quantidade de dados \n");
+        break;
+
+    case CHK:        
+        printf("Erro no checksum\n");
+        break;
+    
+    default:
+        printf("Erro no ETX\n");
+        break;
+    }
+}
+
 void printData(uint8_t *buffer, uint16_t qtd){
     uint16_t i;
     printf("Dados coletados: \n");
@@ -80,12 +100,16 @@ void leSTX(void){
         fsm.chksum = 0;
         fsm.evento = VERDADEIRO;
     }
+    else printError(STX);
 }
 
 
 void leQTD(void){
-    fsm.qtd = fsm.data;
-    fsm.buffer = (uint8_t*) malloc(fsm.qtd * sizeof(uint8_t));
+    if(&fsm.data != NULL) {
+        fsm.qtd = fsm.data;
+        fsm.buffer = (uint8_t*) malloc(fsm.qtd * sizeof(uint8_t));
+    }
+    else printError(QTD);
 }
 
 
@@ -100,12 +124,17 @@ void leDATA(void){
 
 void chkSUM(void){
     if(fsm.data == fsm.chksum) fsm.evento = VERDADEIRO;
-    else fsm.evento = FALSO;
+    else {
+        fsm.evento = FALSO;
+        printError(CHK);
+    }
 }
 
 
 void leETX(void){
     if(fsm.data == ETX) printData(fsm.buffer,fsm.index);
+    else printError(ETX);
+    
     fsm.evento = VERDADEIRO;
 }
 
@@ -141,9 +170,9 @@ void testes_fsm(void){
     
     __init__();
 
-    percorreFSM(dados1,sizeof(dados1));
-    percorreFSM(dados2,sizeof(dados2));
-    percorreFSM(dados3,sizeof(dados3));
+    //percorreFSM(dados1,sizeof(dados1));
+    //percorreFSM(dados2,sizeof(dados2));
+    //percorreFSM(dados3,sizeof(dados3));
     percorreFSM(dados4,sizeof(dados4));
 
 }
