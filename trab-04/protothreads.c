@@ -11,8 +11,72 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define SIZE_DATA 3 // Tamanho do vetor que salva dados
+#define SIZE_MESSAGE 9 // Tamanho da mensagem
+
 /* Two flags that the two protothread functions use. */
-static int protothread1_flag, protothread2_flag;
+static int sender_flag, receiver_flag;
+
+/* Main functions */
+struct Data {
+    uint16_t qtd;
+    char data[SIZE_DATA];
+    uint8_t chksum;
+    uint16_t etx;
+    char msg[SIZE_MESSAGE];
+} dt;
+
+int readSTX() {
+    if (dt.msg[0] == 0x02) return 0;
+    else return -1;
+}
+
+void readQTD() {
+    dt.qtd = dt.msg[1];
+}
+
+void readDATA() {
+    dt.chksum = 0;
+
+    for (size_t i = 0; i < dt.qtd; i++)
+    {
+        dt.data[i] = dt.msg[dt.qtd + i];
+        dt.chksum = dt.msg[dt.qtd + i] ^ dt.chksum;
+    }    
+}
+
+int checkSUM() {
+    if (dt.chksum == dt.msg[dt.qtd + 2]) return 0;
+    else return -1;
+}
+
+int readETX() {
+    if (dt.msg[dt.qtd + 3] == 0x03) return 0;
+    else return -1;
+}
+
+void readMSG() {
+    int aux = 0;
+
+    aux = readSTX();
+    if (aux == 0) readQTD();
+
+    readDATA();
+
+    aux = checkSUM();
+    if (aux == 0) {
+        if (readETX() == 0) {
+            size_t n = sizeof(dt.data)/sizeof(dt.data[0]);
+            printf("Dados: %ld\n", n);
+            for (size_t i = 0; i < n; i++)
+            {
+                printf("%c \n", dt.data[i]);
+            }
+        }
+    }
+
+    
+}
 
 /**
  * The first protothread function. A protothread function must always
@@ -32,13 +96,20 @@ sender(struct pt *pt)
   /* We loop forever here. */
   while(1) {
     /* Wait until the other protothread has set its flag. */
-    PT_WAIT_UNTIL(pt, protothread2_flag != 0);
+    PT_WAIT_UNTIL(pt, receiver_flag != 0);
     printf("Protothread 1 running\n");
+    char msg[SIZE_MESSAGE] = {0x02, 0x03, 2, 1, 1, 2, 0x03};
+
+    for (size_t i = 0; i < SIZE_MESSAGE; i++)
+    {
+        dt.msg[i] = msg[i];
+    }
+    
 
     /* We then reset the other protothread's flag, and set our own
        flag so that the other protothread can run. */
-    protothread2_flag = 0;
-    protothread1_flag = 1;
+    receiver_flag = 0;
+    sender_flag = 1;
 
     /* And we loop. */
   }
@@ -59,14 +130,16 @@ receiver(struct pt *pt)
 
   while(1) {
     /* Let the other protothread run. */
-    protothread2_flag = 1;
+    receiver_flag = 1;
 
     /* Wait until the other protothread has set its flag. */
-    PT_WAIT_UNTIL(pt, protothread1_flag != 0);
+    PT_WAIT_UNTIL(pt, sender_flag != 0);
     printf("Protothread 2 running\n");
     
+    readMSG();
+    
     /* We then reset the other protothread's flag. */
-    protothread1_flag = 0;
+    sender_flag = 0;
 
     /* And we loop. */
   }
