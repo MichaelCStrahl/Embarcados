@@ -30,9 +30,13 @@ int readSTX() {
     else return -1;
 }
 
-void readQTD() {
-    dt.qtd = dt.msg[1];
-    dt.data = (char*) malloc(dt.qtd * sizeof(char));
+int readQTD() {
+    if(dt.msg[1] <= 0) return -1;
+    else{  
+      dt.qtd = dt.msg[1];
+      dt.data = (char*) malloc(dt.qtd * sizeof(char));
+      return 0;
+    }
 }
 
 void readDATA() {
@@ -40,8 +44,8 @@ void readDATA() {
 
     for (size_t i = 0; i < dt.qtd; i++)
     {
-        dt.data[i] = dt.msg[dt.qtd + i];
-        dt.chksum = dt.msg[dt.qtd + i] ^ dt.chksum;
+        dt.data[i] = dt.msg[2 + i];
+        dt.chksum ^= dt.msg[2 + i];
     }    
 }
 
@@ -55,26 +59,52 @@ int readETX() {
     else return -1;
 }
 
+void raiseError(int err){
+  switch (err)
+  {
+  case 1:
+    printf("Erro no STX \n");
+    break;
+
+  case 2:
+    printf("Erro na leitura da quantidade de dados \n");
+    break;
+
+  case 3:
+    printf("Erro no checksum\n");
+    break;
+
+  default:
+    printf("Erro no ETX\n");
+    break;
+  }
+}
+
+
 void readMSG() {
     int aux = 0;
 
     aux = readSTX();
-    if (aux == 0) readQTD();
-
-    readDATA();
-
-    aux = checkSUM();
-    if (aux == 0) {
-        if (readETX() == 0) {
-            printf("Dados: %ld\n", dt.qtd);
-            for (uint16_t i = 0; i < dt.qtd; i++)
-            {
-                printf("%d \n", dt.data[i]);
+    if (aux == -1) raiseError(1);
+    else{
+      aux = readQTD();
+      if(aux == -1) raiseError(2);
+      else{
+        readDATA();
+        aux = checkSUM();
+        if (aux == -1) raiseError(3);
+        else{
+            if (readETX() == -1) raiseError(4);
+            else{
+                printf("Dados: %ld\n", dt.qtd);
+                for (uint16_t i = 0; i < dt.qtd; i++)
+                {
+                    printf("%d \n", dt.data[i]);
+                }
             }
         }
+      }
     }
-
-    
 }
 
 /**
@@ -96,7 +126,11 @@ static int sender(struct pt *pt)
     /* Wait until the other protothread has set its flag. */
     PT_WAIT_UNTIL(pt, receiver_flag != 0);
     printf("Protothread 1 running\n");
-    char msg[SIZE_MESSAGE] = {0x02, 0x03, 2, 1, 1, 2, 0x03};
+    //char msg[SIZE_MESSAGE] = {0x01, 0x03, 2, 1, 1, 2, 0x03}; // Erro forçado no STX
+    //char msg[SIZE_MESSAGE] = {0x02, 0x00, 2, 1, 1, 2, 0x03}; // Erro forçado na QTD
+    //char msg[SIZE_MESSAGE] = {0x02, 0x03, 2, 1, 1, 6, 0x03}; // Erro forçado no CHK
+    //char msg[SIZE_MESSAGE] = {0x02, 0x03, 2, 1, 1, 2, 0x01}; // Erro forçado no ETX
+    char msg[SIZE_MESSAGE] = {0x02, 0x03, 2, 1, 1, 2, 0x03}; // Mensagem correta
 
     for (size_t i = 0; i < SIZE_MESSAGE; i++)
     {
@@ -115,6 +149,7 @@ static int sender(struct pt *pt)
   /* All protothread functions must end with PT_END() which takes a
      pointer to a struct pt. */
   PT_END(pt);
+  printf("Protothread 1 stopped running\n");
 }
 
 /**
@@ -141,6 +176,7 @@ static int receiver(struct pt *pt)
     /* And we loop. */
   }
   PT_END(pt);
+  printf("Protothread 2 stopped running\n");
 }
 
 /**
