@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define SIZE_DATA 3 // Tamanho do vetor que salva dados
 #define SIZE_MESSAGE 9 // Tamanho da mensagem
 
 /* Two flags that the two protothread functions use. */
@@ -20,7 +19,7 @@ static int sender_flag, receiver_flag;
 /* Main functions */
 struct Data {
     uint16_t qtd;
-    char data[SIZE_DATA];
+    char *data;
     uint8_t chksum;
     uint16_t etx;
     char msg[SIZE_MESSAGE];
@@ -33,6 +32,7 @@ int readSTX() {
 
 void readQTD() {
     dt.qtd = dt.msg[1];
+    dt.data = (char*) malloc(dt.qtd * sizeof(char));
 }
 
 void readDATA() {
@@ -66,11 +66,10 @@ void readMSG() {
     aux = checkSUM();
     if (aux == 0) {
         if (readETX() == 0) {
-            size_t n = sizeof(dt.data)/sizeof(dt.data[0]);
-            printf("Dados: %ld\n", n);
-            for (size_t i = 0; i < n; i++)
+            printf("Dados: %ld\n", dt.qtd);
+            for (uint16_t i = 0; i < dt.qtd; i++)
             {
-                printf("%c \n", dt.data[i]);
+                printf("%d \n", dt.data[i]);
             }
         }
     }
@@ -86,8 +85,7 @@ void readMSG() {
  * The protothread function is driven by the main loop further down in
  * the code.
  */
-static int
-sender(struct pt *pt)
+static int sender(struct pt *pt)
 {
   /* A protothread function must begin with PT_BEGIN() which takes a
      pointer to a struct pt. */
@@ -123,8 +121,7 @@ sender(struct pt *pt)
  * The second protothread function. This is almost the same as the
  * first one.
  */
-static int
-receiver(struct pt *pt)
+static int receiver(struct pt *pt)
 {
   PT_BEGIN(pt);
 
@@ -153,8 +150,8 @@ receiver(struct pt *pt)
  * the two protothreads.
  */
 static struct pt pt1, pt2;
-int
-main(void)
+
+int main(void)
 {
   /* Initialize the protothread state variables with PT_INIT(). */
   PT_INIT(&pt1);
