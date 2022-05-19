@@ -96,7 +96,7 @@ void readMSG() {
         else{
             if (readETX() == -1) raiseError(4);
             else{
-                printf("Dados: %ld\n", dt.qtd);
+                printf("Dados: %d\n", dt.qtd);
                 for (uint16_t i = 0; i < dt.qtd; i++)
                 {
                     printf("%d \n", dt.data[i]);
