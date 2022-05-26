@@ -47,6 +47,10 @@ void periodicCoop1(void);
 void periodicCoop2(void);
 void periodicPreemp1(void);
 void periodicPreemp2(void);
+void Produtor(void);
+void Consumidor(void);
+int produz(void);
+void consome(int buf);
 
 /*
  * Configuracao dos tamanhos das pilhas
@@ -78,6 +82,12 @@ uint32_t PILHA_TAREFA_9[TAM_PILHA_9];
 uint32_t PILHA_TAREFA_10[TAM_PILHA_10];
 uint32_t PILHA_TAREFA_OCIOSA[TAM_PILHA_OCIOSA];
 
+#define TAM_BUFFER 10
+uint8_t buffer[TAM_BUFFER]; /* declaracao de um buffer (vetor) ou fila circular */
+
+semaforo_t SemaforoCheio = {0,0}; /* declaracao e inicializacao de um semaforo */
+semaforo_t SemaforoVazio = {TAM_BUFFER,0}; /* declaracao e inicializacao de um semaforo */
+
 /*
  * Funcao principal de entrada do sistema
  */
@@ -92,13 +102,17 @@ int main(void)
 	
 	//CriaTarefa(tarefa_2, "Tarefa 2", PILHA_TAREFA_2, TAM_PILHA_2, 2);
 	
-	CriaTarefa(periodicCoop1, "Tarefa Coop1", PILHA_TAREFA_2, TAM_PILHA_2, 2);
+	//CriaTarefa(periodicCoop1, "Tarefa Coop1", PILHA_TAREFA_2, TAM_PILHA_2, 2);
 
-	CriaTarefa(periodicCoop2,"Tarefa Coop2",PILHA_TAREFA_1,TAM_PILHA_1,1);
+	//CriaTarefa(periodicCoop2,"Tarefa Coop2",PILHA_TAREFA_1,TAM_PILHA_1,1);
 
 	//CriaTarefa(periodicPreemp1, "Tarefa Preemp1", PILHA_TAREFA_2, TAM_PILHA_2, 2);
 
 	//CriaTarefa(periodicPreemp2,"Tarefa Preemp2", PILHA_TAREFA_1,TAM_PILHA_1,1);
+
+	CriaTarefa(Produtor,"Tarefa Produtor", PILHA_TAREFA_1,TAM_PILHA_1,1);
+
+	CriaTarefa(Consumidor,"Tarefa Consumidor", PILHA_TAREFA_2,TAM_PILHA_2,2);
 	
 	/* Cria tarefa ociosa do sistema */
 	CriaTarefa(tarefa_ociosa,"Tarefa ociosa", PILHA_TAREFA_OCIOSA, TAM_PILHA_OCIOSA, 0);
@@ -207,12 +221,6 @@ void tarefa_6(void)
 /* soluçao com buffer compartihado */
 /* Tarefas de exemplo que usam funcoes de semaforo */
 
-#define TAM_BUFFER 10
-uint8_t buffer[TAM_BUFFER]; /* declaracao de um buffer (vetor) ou fila circular */
-
-semaforo_t SemaforoCheio = {0,0}; /* declaracao e inicializacao de um semaforo */
-semaforo_t SemaforoVazio = {TAM_BUFFER,0}; /* declaracao e inicializacao de um semaforo */
-
 void tarefa_7(void)
 {
 
@@ -320,5 +328,38 @@ void periodicPreemp2(void){
 		port_pin_set_output_level(LED_0_PIN, !LED_0_ACTIVE);
 		TarefaEspera(400);
 		
+	}
+}
+
+int produz(void){
+	uint8_t a = 0;
+	port_pin_set_output_level(LED_0_PIN, LED_0_ACTIVE);
+	return 1;
+}
+
+void consome(int buf){
+	uint8_t a = 0;
+	if(buf == 1){
+		port_pin_set_output_level(LED_0_PIN, !LED_0_ACTIVE);
+	}
+}
+
+void Produtor(void){
+	uint8_t f = 0;
+	while(1){
+		SemaforoAguarda(&SemaforoVazio);
+		f = (f+1)%TAM_BUFFER;
+		buffer[f] = produz();
+		SemaforoLibera(&SemaforoCheio);
+	}
+}
+
+void Consumidor(void){
+	uint8_t i = 0;
+	while(1){
+		SemaforoAguarda(&SemaforoCheio);
+		i = (i+1)%TAM_BUFFER;
+		consome(buffer[i]);
+		SemaforoLibera(&SemaforoVazio);
 	}
 }
