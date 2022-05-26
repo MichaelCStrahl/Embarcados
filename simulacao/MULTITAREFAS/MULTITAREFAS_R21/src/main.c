@@ -43,8 +43,6 @@ void tarefa_7(void);
 void tarefa_8(void);
 void tarefa_9(void);
 void tarefa_10(void);
-void periodicCoop1(void);
-void periodicCoop2(void);
 void periodicPreemp1(void);
 void periodicPreemp2(void);
 
@@ -91,14 +89,10 @@ int main(void)
 	//CriaTarefa(tarefa_1, "Tarefa 1", PILHA_TAREFA_1, TAM_PILHA_1, 1);
 	
 	//CriaTarefa(tarefa_2, "Tarefa 2", PILHA_TAREFA_2, TAM_PILHA_2, 2);
-	
-	CriaTarefa(periodicCoop1, "Tarefa Coop1", PILHA_TAREFA_2, TAM_PILHA_2, 2);
 
-	CriaTarefa(periodicCoop2,"Tarefa Coop2",PILHA_TAREFA_1,TAM_PILHA_1,1);
+	CriaTarefa(periodicPreemp1, "Tarefa Preemp1", PILHA_TAREFA_2, TAM_PILHA_2, 2);
 
-	//CriaTarefa(periodicPreemp1, "Tarefa Preemp1", PILHA_TAREFA_2, TAM_PILHA_2, 2);
-
-	//CriaTarefa(periodicPreemp2,"Tarefa Preemp2", PILHA_TAREFA_1,TAM_PILHA_1,1);
+	CriaTarefa(periodicPreemp2, "Tarefa Preemp2", PILHA_TAREFA_1, TAM_PILHA_1, 1);
 	
 	/* Cria tarefa ociosa do sistema */
 	CriaTarefa(tarefa_ociosa,"Tarefa ociosa", PILHA_TAREFA_OCIOSA, TAM_PILHA_OCIOSA, 0);
@@ -279,29 +273,6 @@ void tarefa_9(void)
 		/* Desliga LED. */
 		port_pin_set_output_level(LED_0_PIN, !LED_0_ACTIVE);
 		TarefaEspera(b*100); 	/* tarefa 1 se coloca em espera por 3 marcas de tempo (ticks) */
-	}
-}
-
-void periodicCoop1(void){
-	/* tarefa periódica no modo cooperativo */
-	volatile uint16_t a = 0;
-	while (1){
-		a++;
-		/* Liga LED. */
-		port_pin_set_output_level(LED_0_PIN, LED_0_ACTIVE);
-		TarefaEspera(1000); 	/* tarefa 1 se coloca em espera por 3 marcas de tempo (ticks) */
-		
-	}
-}
-
-void periodicCoop2(void){
-	/* tarefa periódica no modo cooperativo */
-	volatile uint16_t a = 0;
-	while (1){
-		a++;	
-		/* Desliga LED. */
-		port_pin_set_output_level(LED_0_PIN, !LED_0_ACTIVE);
-		TarefaEspera(300); 	/* tarefa 1 se coloca em espera por 3 marcas de tempo (ticks) */
 	}
 }
 
