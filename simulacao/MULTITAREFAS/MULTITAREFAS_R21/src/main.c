@@ -45,8 +45,6 @@ void tarefa_9(void);
 void tarefa_10(void);
 void periodicCoop1(void);
 void periodicCoop2(void);
-void periodicPreemp1(void);
-void periodicPreemp2(void);
 
 /*
  * Configuracao dos tamanhos das pilhas
@@ -94,7 +92,7 @@ int main(void)
 	
 	CriaTarefa(periodicCoop1, "Tarefa Coop1", PILHA_TAREFA_2, TAM_PILHA_2, 2);
 
-	CriaTarefa(periodicCoop2,"Tarefa Coop2",PILHA_TAREFA_1,TAM_PILHA_1,1);
+	CriaTarefa(periodicCoop2, "Tarefa Coop2", PILHA_TAREFA_1, TAM_PILHA_1, 1);
 
 	//CriaTarefa(periodicPreemp1, "Tarefa Preemp1", PILHA_TAREFA_2, TAM_PILHA_2, 2);
 
@@ -302,23 +300,5 @@ void periodicCoop2(void){
 		/* Desliga LED. */
 		port_pin_set_output_level(LED_0_PIN, !LED_0_ACTIVE);
 		TarefaEspera(300); 	/* tarefa 1 se coloca em espera por 3 marcas de tempo (ticks) */
-	}
-}
-
-void periodicPreemp1(void){
-	while(1){
-		/* tarefa periódica no modo preemptivo */
-		port_pin_set_output_level(LED_0_PIN, LED_0_ACTIVE);
-		TarefaEspera(1100);
-	}
-}
-
-void periodicPreemp2(void){
-	while(1){
-		volatile int b = 0; 
-	/* tarefa periódica no modo preemptivo */
-		port_pin_set_output_level(LED_0_PIN, !LED_0_ACTIVE);
-		TarefaEspera(400);
-		
 	}
 }
