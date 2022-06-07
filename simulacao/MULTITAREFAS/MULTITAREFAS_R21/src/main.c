@@ -29,6 +29,7 @@
 #include "stdint.h"
 #include "multitarefas.h"
 #include <unistd.h>
+#include "extint.h"
 
 /*
  * Prototipos das tarefas
@@ -51,6 +52,14 @@ void Produtor(void);
 void Consumidor(void);
 int produz(void);
 void consome(int buf);
+void thread1(void);
+void thread2(void);
+void thread3(void);
+void thread4(void);
+void thread5(void);
+void configure_extint_channel(void);
+void extint_polled(void);
+void extint_callback(void);
 
 /*
  * Configuracao dos tamanhos das pilhas
@@ -88,6 +97,19 @@ uint8_t buffer[TAM_BUFFER]; /* declaracao de um buffer (vetor) ou fila circular 
 semaforo_t SemaforoCheio = {0,0}; /* declaracao e inicializacao de um semaforo */
 semaforo_t SemaforoVazio = {TAM_BUFFER,0}; /* declaracao e inicializacao de um semaforo */
 
+
+/* Configura EXTINT */
+void configure_extint_channel(void)
+{
+ struct extint_chan_conf config_extint_chan;
+ extint_chan_get_config_defaults(&config_extint_chan);
+ config_extint_chan.gpio_pin = BUTTON_0_EIC_PIN;
+ config_extint_chan.gpio_pin_mux = BUTTON_0_EIC_MUX;
+ config_extint_chan.gpio_pin_pull = EXTINT_PULL_UP;
+ config_extint_chan.detection_criteria = EXTINT_DETECT_BOTH;
+ extint_chan_set_config(BUTTON_0_EIC_LINE, &config_extint_chan);
+}
+
 /*
  * Funcao principal de entrada do sistema
  */
@@ -110,9 +132,23 @@ int main(void)
 
 	//CriaTarefa(periodicPreemp2,"Tarefa Preemp2", PILHA_TAREFA_1,TAM_PILHA_1,1);
 
-	CriaTarefa(Produtor,"Tarefa Produtor", PILHA_TAREFA_1,TAM_PILHA_1,1);
+	//CriaTarefa(Produtor,"Tarefa Produtor", PILHA_TAREFA_1,TAM_PILHA_1,1);
 
-	CriaTarefa(Consumidor,"Tarefa Consumidor", PILHA_TAREFA_2,TAM_PILHA_2,2);
+	//CriaTarefa(Consumidor,"Tarefa Consumidor", PILHA_TAREFA_2,TAM_PILHA_2,2);
+
+	//CriaTarefa(thread1,"Tarefa thread1", PILHA_TAREFA_1, TAM_PILHA_1,1);
+
+	//CriaTarefa(thread2,"Tarefa thread2", PILHA_TAREFA_2, TAM_PILHA_2,2);
+
+	//CriaTarefa(thread3,"Tarefa thread3", PILHA_TAREFA_3, TAM_PILHA_3,3);
+
+	//CriaTarefa(thread4,"Tarefa thread4", PILHA_TAREFA_4, TAM_PILHA_4,4);
+
+	//CriaTarefa(thread5,"Tarefa thread5", PILHA_TAREFA_5, TAM_PILHA_5,5);
+
+	//configure_extint_channel();
+
+	CriaTarefa(extint_polled,"Tarefa Polled",PILHA_TAREFA_1, TAM_PILHA_1,1);
 	
 	/* Cria tarefa ociosa do sistema */
 	CriaTarefa(tarefa_ociosa,"Tarefa ociosa", PILHA_TAREFA_OCIOSA, TAM_PILHA_OCIOSA, 0);
@@ -361,5 +397,45 @@ void Consumidor(void){
 		i = (i+1)%TAM_BUFFER;
 		consome(buffer[i]);
 		SemaforoLibera(&SemaforoVazio);
+	}
+}
+
+
+void thread1(void){
+	uint8_t count1=0;
+		
+}
+
+void thread2(void){
+	uint8_t count2=0;
+}
+
+void thread3(void){
+	uint8_t count3=0;
+}
+
+void thread4(void){
+	uint8_t count4=0;
+}
+
+void thread5(void){
+	uint8_t count5=0;
+}
+
+
+void extint_polled(void){
+	while (true) {
+		if (extint_chan_is_detected(BUTTON_0_EIC_LINE)) {
+			// Do something in response to EXTINT edge detection
+			bool button_pin_state = port_pin_get_input_level(BUTTON_0_PIN);
+			port_pin_set_output_level(LED_0_PIN, button_pin_state);
+			extint_chan_clear_detected(BUTTON_0_EIC_LINE);
+		}
+	}
+}
+
+void extint_callback(void){
+	while (true) {
+		/* Do nothing - EXTINT will fire callback asynchronously */
 	}
 }

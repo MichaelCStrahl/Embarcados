@@ -56,6 +56,9 @@
 #include <compiler.h>
 #include <status_codes.h>
 
+// From module: EXTINT - External Interrupt (Polled APIs)
+#include <extint.h>
+
 // From module: Generic board support
 #include <board.h>
 
