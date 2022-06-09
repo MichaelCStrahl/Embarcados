@@ -57,6 +57,7 @@ void thread2(void);
 void thread3(void);
 void thread4(void);
 void thread5(void);
+void thread_print(int c1,int c2,int c3,int c4,int c5);
 void configure_extint_channel(void);
 void configure_extint_callbacks(void);
 void extint_detection_callback(void);
@@ -148,25 +149,27 @@ int main(void)
 
 	//CriaTarefa(Consumidor,"Tarefa Consumidor", PILHA_TAREFA_2,TAM_PILHA_2,2);
 
-	//CriaTarefa(thread1,"Tarefa thread1", PILHA_TAREFA_1, TAM_PILHA_1,1);
+	//CriaTarefa(thread1,"Tarefa thread1", PILHA_TAREFA_1, TAM_PILHA_1,4);
 
-	//CriaTarefa(thread2,"Tarefa thread2", PILHA_TAREFA_2, TAM_PILHA_2,2);
+	//CriaTarefa(thread2,"Tarefa thread2", PILHA_TAREFA_2, TAM_PILHA_2,3);
 
-	//CriaTarefa(thread3,"Tarefa thread3", PILHA_TAREFA_3, TAM_PILHA_3,3);
+	//CriaTarefa(thread3,"Tarefa thread3", PILHA_TAREFA_3, TAM_PILHA_3,2);
 
-	//CriaTarefa(thread4,"Tarefa thread4", PILHA_TAREFA_4, TAM_PILHA_4,4);
+	//CriaTarefa(thread4,"Tarefa thread4", PILHA_TAREFA_4, TAM_PILHA_4,1);
 
-	//CriaTarefa(thread5,"Tarefa thread5", PILHA_TAREFA_5, TAM_PILHA_5,5);
+	//CriaTarefa(thread5,"Tarefa thread5", PILHA_TAREFA_5, TAM_PILHA_5,0);
+
+	//CriaTarefa(thread_print,"Tarefa thread_print",PILHA_TAREFA_6,TAM_PILHA_6,5);
 
 	//configure_extint_channel();
 
 	//CriaTarefa(extint_polled,"Tarefa Polled",PILHA_TAREFA_1, TAM_PILHA_1,1);
 
-	configure_extint_channel();
-	configure_extint_callbacks();
-	system_interrupt_enable_global();
+	//configure_extint_channel();
+	//configure_extint_callbacks();
+	//system_interrupt_enable_global();
 
-	CriaTarefa(extint_callback,"Tarefa Callback",PILHA_TAREFA_1, TAM_PILHA_1,1);
+	//CriaTarefa(extint_callback,"Tarefa Callback",PILHA_TAREFA_1, TAM_PILHA_1,1);
 	
 	/* Cria tarefa ociosa do sistema */
 	CriaTarefa(tarefa_ociosa,"Tarefa ociosa", PILHA_TAREFA_OCIOSA, TAM_PILHA_OCIOSA, 0);
@@ -421,25 +424,45 @@ void Consumidor(void){
 
 void thread1(void){
 	uint8_t count1=0;
-		
+	count1++;
+	TarefaContinua(2);
 }
 
 void thread2(void){
 	uint8_t count2=0;
+	count2++;
+	TarefaContinua(3);
+	TarefaSuspende(2);
 }
 
 void thread3(void){
 	uint8_t count3=0;
+	count3++;
+	TarefaContinua(4);
+	TarefaSuspende(3);
 }
 
 void thread4(void){
 	uint8_t count4=0;
+	count4++;
+	TarefaContinua(5);
+	TarefaSuspende(4);
 }
 
 void thread5(void){
 	uint8_t count5=0;
+	count5++;
+	TarefaSuspende(5);
 }
 
+void thread_print(int c1,int c2,int c3,int c4,int c5){
+	int cn1 = c1;
+	int cn2 = c2;
+	int cn3 = c3;
+	int cn4 = c4;
+	int cn5 = c5;
+	TarefaEspera(300);
+}
 
 void extint_polled(void){
 	while (true) {
@@ -456,4 +479,8 @@ void extint_callback(void){
 	while (true) {
 		/* Do nothing - EXTINT will fire callback asynchronously */
 	}
+}
+
+void pwm(void){
+	
 }
