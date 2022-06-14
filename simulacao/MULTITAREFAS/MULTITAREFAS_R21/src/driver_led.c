@@ -1,4 +1,3 @@
-#include <asf.h>
 #include "driver_led.h"
 
 void led_config(uint8_t led_num, uint8_t pin){

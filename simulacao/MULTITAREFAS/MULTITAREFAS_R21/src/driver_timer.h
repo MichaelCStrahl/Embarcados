@@ -1,3 +1,5 @@
+#include <asf.h>
+
 void timer_config(uint8_t timer_num, uint16_t period_ms);
 
 void timer_start(uint8_t timer_num);
