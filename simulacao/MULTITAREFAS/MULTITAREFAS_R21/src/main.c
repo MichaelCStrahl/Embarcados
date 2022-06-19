@@ -149,17 +149,22 @@ int main(void)
 
 	//CriaTarefa(Consumidor,"Tarefa Consumidor", PILHA_TAREFA_2,TAM_PILHA_2,2);
 
-	//CriaTarefa(thread1,"Tarefa thread1", PILHA_TAREFA_1, TAM_PILHA_1,4);
+	CriaTarefa(thread1,"Tarefa thread1", PILHA_TAREFA_1, TAM_PILHA_1,0);
 
-	//CriaTarefa(thread2,"Tarefa thread2", PILHA_TAREFA_2, TAM_PILHA_2,3);
+	CriaTarefa(thread2,"Tarefa thread2", PILHA_TAREFA_2, TAM_PILHA_2,1);
 
-	//CriaTarefa(thread3,"Tarefa thread3", PILHA_TAREFA_3, TAM_PILHA_3,2);
+	CriaTarefa(thread3,"Tarefa thread3", PILHA_TAREFA_3, TAM_PILHA_3,2);
 
-	//CriaTarefa(thread4,"Tarefa thread4", PILHA_TAREFA_4, TAM_PILHA_4,1);
+	CriaTarefa(thread4,"Tarefa thread4", PILHA_TAREFA_4, TAM_PILHA_4,3);
 
-	//CriaTarefa(thread5,"Tarefa thread5", PILHA_TAREFA_5, TAM_PILHA_5,0);
+	CriaTarefa(thread5,"Tarefa thread5", PILHA_TAREFA_5, TAM_PILHA_5,4);
 
-	//CriaTarefa(thread_print,"Tarefa thread_print",PILHA_TAREFA_6,TAM_PILHA_6,5);
+	CriaTarefa(thread_print,"Tarefa thread_print",PILHA_TAREFA_6,TAM_PILHA_6,5);
+
+	TCB[1].estado = ESPERA;
+    TCB[2].estado = ESPERA;
+    TCB[3].estado = ESPERA;
+    TCB[4].estado = ESPERA;
 
 	//configure_extint_channel();
 
@@ -424,35 +429,45 @@ void Consumidor(void){
 
 void thread1(void){
 	uint8_t count1=0;
-	count1++;
-	TarefaContinua(2);
+	while(1){
+		count1++;
+		TarefaContinua(2);
+	}
 }
 
 void thread2(void){
 	uint8_t count2=0;
-	count2++;
-	TarefaContinua(3);
-	TarefaSuspende(2);
+	while(1){
+		count2++;
+		TarefaContinua(3);
+		TarefaSuspende(2);
+	}
 }
 
 void thread3(void){
 	uint8_t count3=0;
-	count3++;
-	TarefaContinua(4);
-	TarefaSuspende(3);
+	while(1){
+		count3++;
+		TarefaContinua(4);
+		TarefaSuspende(3);
+	}
 }
 
 void thread4(void){
 	uint8_t count4=0;
-	count4++;
-	TarefaContinua(5);
-	TarefaSuspende(4);
+	while(1){
+		count4++;
+		TarefaContinua(5);
+		TarefaSuspende(4);
+	}
 }
 
 void thread5(void){
 	uint8_t count5=0;
-	count5++;
-	TarefaSuspende(5);
+	while(1){
+		count5++;
+		TarefaSuspende(5);
+	}
 }
 
 void thread_print(int c1,int c2,int c3,int c4,int c5){
@@ -461,7 +476,7 @@ void thread_print(int c1,int c2,int c3,int c4,int c5){
 	int cn3 = c3;
 	int cn4 = c4;
 	int cn5 = c5;
-	TarefaEspera(300);
+	TarefaEspera(30);
 }
 
 void extint_polled(void){
@@ -479,8 +494,4 @@ void extint_callback(void){
 	while (true) {
 		/* Do nothing - EXTINT will fire callback asynchronously */
 	}
-}
-
-void pwm(void){
-	
 }
