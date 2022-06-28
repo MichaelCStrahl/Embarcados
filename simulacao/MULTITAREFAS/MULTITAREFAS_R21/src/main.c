@@ -491,17 +491,19 @@ void extint_callback(void){
 
 
 void adc_reader(){
-	const uint8_t temp = ADC_INPUTCTRL_MUXPOS_TEMP_Val;
-	const uint8_t bandgap = ADC_INPUTCTRL_MUXPOS_BANDGAP_Val;
-	uint16_t result;
-	uint16_t bandigap;
-	float temperature=0.0;
+	const uint8_t temp = 0x18;
+	const uint8_t bandgap = 0x19;
+	uint16_t result = 0;
+	uint16_t bandigap = 0;
+	float voltage = 0;
+	float temperature = 0;
 
 	while(true){
 		adc_config_driver(0,temp,ADC_RESOLUTION_12BIT,ADC_CLOCK_PRESCALER_DIV8);
 		result = adc_read_in(0,temp);
 		bandigap = adc_read_in(0,bandgap);
-		temperature = result/bandigap;
-		temperature = 25 + 0.24/(result/bandigap);
+		voltage = (result*0.667)/bandigap;
+
+		temperature = 25 + ((voltage-0.667)/0.0024);
 	}
 }
