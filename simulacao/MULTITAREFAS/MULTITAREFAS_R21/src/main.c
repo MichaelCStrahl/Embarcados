@@ -69,6 +69,7 @@ void extint_detection_callback(void);
 void extint_polled(void);
 void extint_callback(void);
 void adc_reader(void);
+void pwm(void);
 
 /*
  * Configuracao dos tamanhos das pilhas
@@ -177,8 +178,11 @@ int main(void)
 
 	//CriaTarefa(extint_callback,"Tarefa Callback",PILHA_TAREFA_1, TAM_PILHA_1,1);
 
-	CriaTarefa(adc_reader,"Tarefa adc reader",PILHA_TAREFA_1, TAM_PILHA_1,1);
+	//CriaTarefa(adc_reader,"Tarefa adc reader",PILHA_TAREFA_1, TAM_PILHA_1,1);
 	
+	CriaTarefa(pwm,"Tarefa pwm",PILHA_TAREFA_1, TAM_PILHA_1,1);
+	
+
 	/* Cria tarefa ociosa do sistema */
 	CriaTarefa(tarefa_ociosa,"Tarefa ociosa", PILHA_TAREFA_OCIOSA, TAM_PILHA_OCIOSA, 0);
 	
@@ -489,7 +493,6 @@ void extint_callback(void){
 	}
 }
 
-
 void adc_reader(){
 	const uint8_t temp = 0x18;
 	const uint8_t bandgap = 0x19;
@@ -505,5 +508,17 @@ void adc_reader(){
 		voltage = (result*0.667)/bandigap;
 
 		temperature = 25 + ((voltage-0.667)/0.0024);
+	}
+}
+
+void pwm(){
+	int a = 0;
+	while(true){
+		pwm_config(0,LED_0_PIN);
+		pwm_on(0);
+		for(int i=0;i<10000;i++){
+			a++;
+		}
+		a++;
 	}
 }
