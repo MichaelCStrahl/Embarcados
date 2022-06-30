@@ -35,6 +35,7 @@
 #include "driver_timer.h"
 #include "driver_pwm.h"
 #include "driver_adc.h"
+#include "driver_uart.h"
 
 /*
  * Prototipos das tarefas
@@ -70,6 +71,7 @@ void extint_polled(void);
 void extint_callback(void);
 void adc_reader(void);
 void pwm(void);
+void print(void);
 
 /*
  * Configuracao dos tamanhos das pilhas
@@ -180,8 +182,9 @@ int main(void)
 
 	//CriaTarefa(adc_reader,"Tarefa adc reader",PILHA_TAREFA_1, TAM_PILHA_1,1);
 	
-	CriaTarefa(pwm,"Tarefa pwm",PILHA_TAREFA_1, TAM_PILHA_1,1);
+	//CriaTarefa(pwm,"Tarefa pwm",PILHA_TAREFA_1, TAM_PILHA_1,1);
 	
+	CriaTarefa(print,"Tarefa print",PILHA_TAREFA_1, TAM_PILHA_1,1);
 
 	/* Cria tarefa ociosa do sistema */
 	CriaTarefa(tarefa_ociosa,"Tarefa ociosa", PILHA_TAREFA_OCIOSA, TAM_PILHA_OCIOSA, 0);
@@ -433,7 +436,6 @@ void Consumidor(void){
 	}
 }
 
-
 void thread1(void){
 	uint8_t count1=0;
 	count1++;
@@ -521,4 +523,11 @@ void pwm(){
 		}
 		a++;
 	}
+}
+
+void print(){
+	uint8_t ch;
+	uart_config(0,9600);
+	//uart_recebe(0,ch);
+	uart_transmite(123);
 }
