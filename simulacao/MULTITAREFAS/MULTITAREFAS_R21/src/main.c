@@ -26,6 +26,7 @@
  * Inclusao de arquivos de cabecalhos
  */
 #include <asf.h>
+#include <stdio.h>
 #include "stdint.h"
 #include "multitarefas.h"
 #include <unistd.h>
@@ -528,6 +529,9 @@ void pwm(){
 void print(){
 	uint8_t ch;
 	uart_config(0,9600);
-	//uart_recebe(0,ch);
-	uart_transmite(123);
+	uart_transmite(0);
+	while(1){
+		//uart_recebe(0,ch);
+		
+	}
 }
